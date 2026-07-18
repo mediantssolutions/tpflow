@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vicancio Survey</title>
+
+  <!-- Shopify Survey Form - Vicancio -->
+  <style>
+    :root{
+      --bg:#f3f4f6;
+      --card:#ffffff;
+      --muted:#666;
+      --text:#111;
+      --border:#ddd;
+      --focus:#111;
+      --danger:#d32f2f;
+      --radius:14px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      line-height:1.4;
+    }
+
+    .survey-container {
+      max-width: 720px;
+      margin: 24px auto;
+      padding: 24px;
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    }
+
+    .survey-container h2 {
+      margin: 0 0 10px 0;
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .survey-container p {
+      margin: 0 0 26px 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .question {
+      margin-bottom: 22px;
+      padding: 16px;
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .question-label {
+      display: block;
+      margin-bottom: 12px;
+      font-weight: 650;
+      color: var(--text);
+      font-size: 15px;
+    }
+
+    .text-input {
+      width: 100%;
+      padding: 14px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 16px; /* 16px prevents iOS zoom-on-focus */
+      background: #fff;
+    }
+
+    .text-input:focus {
+      outline: none;
+      border-color: var(--focus);
+      box-shadow: 0 0 0 3px rgba(0,0,0,0.08);
+    }
+
+    .radio-group, .checkbox-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .radio-label, .checkbox-label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      font-size: 15px;
+      color: #222;
+      gap: 10px;
+      padding: 10px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(0,0,0,0.06);
+      background: #fafafa;
+    }
+
+    .radio-label:hover, .checkbox-label:hover {
+      background: #f6f6f6;
+    }
+
+    .radio-label input[type="radio"],
+    .checkbox-label input[type="checkbox"] {
+      margin: 0;
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      accent-color: #111;
+      flex: 0 0 auto;
+    }
+
+    .stars-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .star-btn {
+      padding: 10px 12px;
+      border: 2px solid rgba(0,0,0,0.12);
+      background: #fff;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 20px;
+      transition: transform 0.12s, border-color 0.12s, background 0.12s;
+      min-width: 72px;
+      text-align:center;
+    }
+
+    .star-btn:hover {
+      border-color: #111;
+      transform: translateY(-1px);
+    }
+
+    .star-btn.selected {
+      border-color: #111;
+      background: #f3f3f3;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      background: #111;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 650;
+      cursor: pointer;
+      margin-top: 14px;
+      transition: transform 0.12s, opacity 0.12s;
+    }
+
+    .submit-btn:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .error-message {
+      color: var(--danger);
+      font-size: 12px;
+      margin-top: 8px;
+      display: none;
+    }
+
+    /* Mobile tweaks */
+    @media (max-width: 520px){
+      .survey-container{
+        margin: 14px;
+        padding: 18px;
+      }
+      .survey-container h2{
+        font-size: 20px;
+      }
+      .question{
+        padding: 14px;
+      }
+      .star-btn{
+        flex: 1 1 calc(50% - 10px);
+        min-width: 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="survey-container">
+    <h2>Quick feedback</h2>
+    <p>Answer 5 questions (takes less than 1 minute).</p>
+
+    <form id="surveyForm">
+      <!-- Q1 -->
+      <div class="question">
+        <label class="question-label">Q1. What's your name? (Same as used when placing the order)</label>
+        <input type="text" class="text-input" name="name" required>
+        <div class="error-message" id="nameError">Please enter your name</div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="question">
+        <label class="question-label">Q2. How easy was it to place your order?</label>
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" name="ease" value="Very easy" required> Very easy
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="ease" value="Easy"> Easy
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="ease" value="Neutral"> Neutral
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="ease" value="Difficult"> Difficult
+          </label>
+        </div>
+        <div class="error-message" id="easeError">Please select an option</div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="question">
+        <label class="question-label">Q3. What made you decide to buy from us?</label>
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" name="decision" value="Price" required> Price
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="decision" value="Product quality"> Product quality
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="decision" value="Design"> Design
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="decision" value="Reviews"> Reviews
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="decision" value="Social media"> Social media
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="decision" value="Other"> Other
+          </label>
+        </div>
+        <div class="error-message" id="decisionError">Please select an option</div>
+      </div>
+
+      <!-- Q4 -->
+      <div class="question">
+        <label class="question-label">Q4. Is there anything we could improve?</label>
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" name="improve" value="Website experience" required> Website experience
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="improve" value="Product information"> Product information
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="improve" value="Checkout process"> Checkout process
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="improve" value="Communication / emails"> Communication / emails
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="improve" value="Nothing — everything was good"> Nothing — everything was good
+          </label>
+        </div>
+        <div class="error-message" id="improveError">Please select an option</div>
+      </div>
+
+      <!-- Q5 -->
+      <div class="question">
+        <label class="question-label">Q5. How many stars would you give this experience?</label>
+        <div class="stars-group" id="starsGroup">
+          <button type="button" class="star-btn" data-stars="5" aria-label="5 stars">⭐⭐⭐⭐⭐</button>
+          <button type="button" class="star-btn" data-stars="4" aria-label="4 stars">⭐⭐⭐⭐</button>
+          <button type="button" class="star-btn" data-stars="3" aria-label="3 stars">⭐⭐⭐</button>
+          <button type="button" class="star-btn" data-stars="2" aria-label="2 stars">⭐⭐</button>
+          <button type="button" class="star-btn" data-stars="1" aria-label="1 star">⭐</button>
+        </div>
+        <input type="hidden" name="stars" id="starsInput" required>
+        <div class="error-message" id="starsError">Please select a rating</div>
+      </div>
+
+      <button type="submit" class="submit-btn">Submit</button>
+    </form>
+  </div>
+
+  <script>
+    (function() {
+      const form = document.getElementById('surveyForm');
+      const submitBtn = form.querySelector('.submit-btn');
+
+      // Handle Q5 stars selection (ROBUST: works even if user clicks inside the button)
+      const starsGroup = document.getElementById('starsGroup');
+      const starsInput = document.getElementById('starsInput');
+
+      starsGroup.addEventListener('click', function(e) {
+        const btn = e.target.closest('.star-btn');
+        if (!btn) return;
+
+        starsGroup.querySelectorAll('.star-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        starsInput.value = btn.dataset.stars;
+        document.getElementById('starsError').style.display = 'none';
+      });
+
+      // Form submission
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        // Validation
+        let isValid = true;
+        const name = form.querySelector('input[name="name"]').value.trim();
+        const ease = form.querySelector('input[name="ease"]:checked');
+        const decision = form.querySelector('input[name="decision"]:checked');
+        const improve = form.querySelector('input[name="improve"]:checked');
+        const stars = starsInput.value;
+
+        if (!name) {
+          document.getElementById('nameError').style.display = 'block';
+          isValid = false;
+        } else {
+          document.getElementById('nameError').style.display = 'none';
+        }
+
+        if (!ease) {
+          document.getElementById('easeError').style.display = 'block';
+          isValid = false;
+        } else {
+          document.getElementById('easeError').style.display = 'none';
+        }
+
+        if (!decision) {
+          document.getElementById('decisionError').style.display = 'block';
+          isValid = false;
+        } else {
+          document.getElementById('decisionError').style.display = 'none';
+        }
+
+        if (!improve) {
+          document.getElementById('improveError').style.display = 'block';
+          isValid = false;
+        } else {
+          document.getElementById('improveError').style.display = 'none';
+        }
+
+        if (!stars) {
+          document.getElementById('starsError').style.display = 'block';
+          isValid = false;
+        } else {
+          document.getElementById('starsError').style.display = 'none';
+        }
+
+        if (!isValid) return;
+
+        // Disable submit button
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting...';
+
+        // Collect data
+        const easeValue = ease.value;
+        const decisionValue = decision.value;
+        const improveValue = improve.value;
+        const starRating = parseInt(stars, 10);
+
+        // Open Trustpilot FIRST (before any async operations) for mobile compatibility
+        // Mobile browsers block window.open() if not in direct user action
+        if (starRating >= 3) {
+          window.open('https://www.trustpilot.com/evaluate/vicancio.com', '_blank');
+        }
+
+        // Send to Discord (UPDATED WEBHOOK)
+        const webhookUrl = 'https://discord.com/api/webhooks/1527932734452797571/NuVQfDNhRRLcCUTn0QVOTefRzUr9kj7jDBp2FITiFdzGUi8eIr77j1Xle3sQuh_6yKU9';
+
+        const discordPayload = {
+          embeds: [{
+            title: '📋 New Survey Response - Vicancio',
+            color: 3066993,
+            fields: [
+              { name: 'Q1. Name', value: name, inline: false },
+              { name: 'Q2. Order Ease', value: easeValue, inline: true },
+              { name: 'Q5. Rating', value: '⭐'.repeat(starRating) + ` (${starRating} stars)`, inline: true },
+              { name: 'Q3. Decision Factor', value: decisionValue, inline: false },
+              { name: 'Q4. Improvement', value: improveValue, inline: false }
+            ],
+            timestamp: new Date().toISOString()
+          }]
+        };
+
+        try {
+          // Send to Discord (use sendBeacon for reliability on redirect)
+          const blob = new Blob([JSON.stringify(discordPayload)], { type: 'application/json' });
+          if (navigator.sendBeacon) {
+            navigator.sendBeacon(webhookUrl, blob);
+          } else {
+            await fetch(webhookUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(discordPayload)
+            });
+          }
+
+          // Small delay to help ensure the webhook request is sent before redirect
+          await new Promise(resolve => setTimeout(resolve, 300));
+
+          // Redirect to YOUR GitHub Pages thank you page
+          window.location.href = 'thankyou.html';
+
+        } catch (error) {
+          console.error('Error submitting survey:', error);
+          // Still redirect even if Discord fails
+          window.location.href = 'thankyou.html';
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
