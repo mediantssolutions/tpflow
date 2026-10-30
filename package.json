@@ -1,0 +1,9 @@
+{
+  "name": "shopper-survey",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-pages.js",
+    "test": "node --test tests/*.test.js"
+  }
+}
