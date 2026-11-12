@@ -97,13 +97,14 @@ test('network/5xx submit does not show thanks, preserves retry state, and reuses
   }
 });
 
-test('every rating 1–5 submits exactly once and receives the identical optional public-review URL/reward', async () => {
+test('every rating 1–5 submits exactly once with the same reward; only 4–5 stars get the Trustpilot link', async () => {
   const received = [];
   for (let stars = 1; stars <= 5; stars++) {
     const calls = [];
+    // The server sends no link for 1–3 stars (owner 2026-11-12).
     const { controller, states } = setup(async (path, body) => {
       calls.push({ path, body });
-      return path === API_PATHS.context ? context() : receipt();
+      return path === API_PATHS.context ? context() : receipt(stars >= 4 ? {} : { review_url: null });
     });
     await controller.load();
     assert.equal(await controller.submit(answers(stars)), true);
@@ -112,7 +113,7 @@ test('every rating 1–5 submits exactly once and receives the identical optiona
     assert.equal(calls.at(-1).body.form_version, 1);
     received.push({ url: states.at(-1).review_url, reward: states.at(-1).reward });
   }
-  assert.ok(received.every(result => result.url === reviewUrl));
+  assert.deepEqual(received.map(result => result.url), [null, null, null, reviewUrl, reviewUrl]);
   assert.ok(received.every(result => JSON.stringify(result.reward) === JSON.stringify(reward)));
 });
 
@@ -177,7 +178,34 @@ test('server-authorized official review/evaluate routes work without rating-pref
     const { controller, states } = setup(async path => path === API_PATHS.context ? context({ store: { ...store, review_url: target } }) : receipt({ review_url: target }));
     await controller.load();
     assert.equal(controller.phase, 'open');
-    assert.equal(await controller.submit(answers(1)), true);
+    assert.equal(await controller.submit(answers(5)), true);
     assert.equal(states.at(-1).review_url, target);
   }
+});
+
+test('an older server that sends the link for every rating still shows it for 4–5 stars only', async () => {
+  const received = [];
+  for (let stars = 1; stars <= 5; stars++) {
+    const { controller, states } = setup(async path => path === API_PATHS.context ? context() : receipt());
+    await controller.load();
+    assert.equal(await controller.submit(answers(stars)), true);
+    received.push(states.at(-1).review_url);
+  }
+  assert.deepEqual(received, [null, null, null, reviewUrl, reviewUrl]);
+});
+
+test('reopening a submitted invitation shows the link only when the server says so', async () => {
+  for (const [given, shown] of [[reviewUrl, reviewUrl], [null, null], [undefined, null]]) {
+    const { controller, states } = setup(async () => context({ status: 'submitted', review_url: given }));
+    assert.equal(await controller.load(), true);
+    assert.equal(states.at(-1).phase, 'submitted');
+    assert.equal(states.at(-1).review_url, shown);
+  }
+});
+
+test('a 4–5 star link for another store or with extra parts is refused', async () => {
+  const { controller, states } = setup(async path => path === API_PATHS.context ? context() : receipt({ review_url: 'https://www.trustpilot.com/evaluate/muupa.com' }));
+  await controller.load();
+  assert.equal(await controller.submit(answers(5)), false);
+  assert.notEqual(states.at(-1).phase, 'submitted');
 });

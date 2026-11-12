@@ -31,8 +31,11 @@ and the optional external review link uses `noopener noreferrer`.
 The route's expected store must match the server context. The server owns order
 identity, response/reward idempotency and any actual reward delivery. The frontend
 does not generate a benefit, amount, payment claim, deadline or marketing event.
-It displays only the validated server reward status/description. A public review
-is optional for every rating and has no bearing on the survey reward.
+It displays only the validated server reward status/description. The reward is the
+same for every rating and never depends on a public review. Owner 2026-11-12: only a
+4–5 star answer is shown the store's Trustpilot write-a-review link, when the server
+sends one (the server sends none for 1–3 stars, and the page also checks the rating
+it submitted).
 
 Without a token, all five questions remain visible as a disabled preview. Invalid
 or expired invitations offer generic store support. Network/server failures stay
