@@ -85,7 +85,10 @@ export function createSurveyView(document, { onRetry = () => {}, onSubmit = () =
         document.title = state.store.name + ' — Thank you';
         byId('completionText').textContent = 'Thank you for sharing your feedback with ' + state.store.name + '. Your survey has been submitted.';
         setReward('complete', state.reward);
-        byId('reviewLink').href = state.review_url;
+        // Owner 2026-11-12: the Trustpilot invite shows for a 4–5 star answer only.
+        byId('reviewInvite').hidden = !state.review_url;
+        if (state.review_url) byId('reviewLink').href = state.review_url;
+        else byId('reviewLink').removeAttribute('href');
         byId('thankYouTitle').focus();
       }
     }

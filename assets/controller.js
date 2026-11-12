@@ -6,6 +6,9 @@ export const CHOICES = Object.freeze({
   improve: ['Website experience', 'Product information', 'Checkout process', 'Communication / emails', 'Nothing — everything was good']
 });
 const REWARD_STATUSES = new Set(['pending_review', 'not_offered', 'fulfilled']);
+// Owner 2026-11-12: only a 4 or 5 star answer is shown the store's Trustpilot write-a-review link.
+// The server decides too (it sends no link for 1–3 stars); the page also checks the rating it sent.
+export const REVIEW_MIN_STARS = 4;
 
 export class SurveyApiError extends Error {
   constructor(status = 0) { super('Survey request could not be completed.'); this.status = status; }
@@ -54,6 +57,11 @@ function reviewUrlFrom(value, expected) {
   if (url.protocol !== 'https:' || !['www.trustpilot.com', 'uk.trustpilot.com', 'trustpilot.com'].includes(url.hostname) || !['/evaluate/' + expected.review_domain, '/review/' + expected.review_domain].includes(url.pathname) || url.search || url.hash || url.username || url.password || url.port) throw new SurveyApiError();
   return url.href;
 }
+// A review link the server chose to give: validated like the store's own link, or none at all.
+function optionalReviewUrl(value, expected) {
+  if (value === null || value === undefined) return null;
+  return reviewUrlFrom(value, expected);
+}
 function storeFrom(value, expected) {
   if (!value || value.key !== expected.key || typeof value.name !== 'string' || !value.name.trim() || value.name.length > 120) throw new SurveyApiError(400);
   let home;
@@ -89,7 +97,7 @@ export function createSurveyController({ expectedStore, inviteToken, api = creat
       if (result.form_version !== 1 || !['open', 'submitted'].includes(result.status)) throw new SurveyApiError();
       currentStore = storeFrom(result.store, expectedStore);
       reward = rewardFrom(result.reward);
-      if (result.status === 'submitted') emit('submitted', { review_url: currentStore.review_url, acknowledged: true });
+      if (result.status === 'submitted') emit('submitted', { review_url: optionalReviewUrl(result.review_url, expectedStore), acknowledged: true });
       else emit('open', { notice: '' });
       return true;
     } catch (error) {
@@ -112,7 +120,7 @@ export function createSurveyController({ expectedStore, inviteToken, api = creat
         const receiptValid = (typeof result.receipt_id === 'string' && result.receipt_id.length > 0) || (Number.isSafeInteger(result.receipt_id) && result.receipt_id > 0);
         if (result.status !== 'submitted' || !receiptValid) throw new SurveyApiError();
         const nextReward = rewardFrom(result.reward);
-        const review = reviewUrlFrom(result.review_url, expectedStore);
+        const review = answers.stars >= REVIEW_MIN_STARS ? optionalReviewUrl(result.review_url, expectedStore) : null;
         reward = nextReward;
         emit('submitted', { review_url: review, acknowledged: true, newly_submitted: true });
         return true;
