@@ -1,3 +1,4 @@
+import { homeHosts, reviewDomains } from './stores.js';
 export const API_BASE = 'https://api-production-c98b.up.railway.app';
 export const API_PATHS = Object.freeze({ context: '/api/public/surveys/v1/context', submit: '/api/public/surveys/v1/submit' });
 export const CHOICES = Object.freeze({
@@ -54,7 +55,7 @@ function rewardFrom(value) {
 function reviewUrlFrom(value, expected) {
   let url;
   try { url = new URL(value); } catch { throw new SurveyApiError(); }
-  if (url.protocol !== 'https:' || !['www.trustpilot.com', 'uk.trustpilot.com', 'trustpilot.com'].includes(url.hostname) || !['/evaluate/' + expected.review_domain, '/review/' + expected.review_domain].includes(url.pathname) || url.search || url.hash || url.username || url.password || url.port) throw new SurveyApiError();
+  if (url.protocol !== 'https:' || !['www.trustpilot.com', 'uk.trustpilot.com', 'trustpilot.com'].includes(url.hostname) || !reviewDomains(expected).flatMap(domain => ['/evaluate/' + domain, '/review/' + domain]).includes(url.pathname) || url.search || url.hash || url.username || url.password || url.port) throw new SurveyApiError();
   return url.href;
 }
 // A review link the server chose to give: validated like the store's own link, or none at all.
@@ -66,8 +67,7 @@ function storeFrom(value, expected) {
   if (!value || value.key !== expected.key || typeof value.name !== 'string' || !value.name.trim() || value.name.length > 120) throw new SurveyApiError(400);
   let home;
   try { home = new URL(value.home_url); } catch { throw new SurveyApiError(); }
-  const canonical = new URL(expected.home_url);
-  if (home.protocol !== 'https:' || home.hostname !== canonical.hostname || home.username || home.password || home.port || home.search || home.hash) throw new SurveyApiError();
+  if (home.protocol !== 'https:' || !homeHosts(expected).includes(home.hostname) || home.username || home.password || home.port || home.search || home.hash) throw new SurveyApiError();
   if (typeof value.support_email !== 'string' || !/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(value.support_email) || value.support_email.length > 254) throw new SurveyApiError();
   return { key: value.key, name: value.name.trim(), home_url: home.href, support_email: value.support_email, review_url: reviewUrlFrom(value.review_url, expected) };
 }

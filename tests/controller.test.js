@@ -29,8 +29,8 @@ test('fragment-only identity rejects missing/duplicate invite and ignores query 
   assert.equal(states.at(-1).acknowledged, undefined);
 });
 
-test('all eight routes and four aliases resolve the expected store, including both page steps', () => {
-  assert.equal(Object.keys(ROUTES).length, 12);
+test('all eight routes and five aliases resolve the expected store, including both page steps', () => {
+  assert.equal(Object.keys(ROUTES).length, 13);
   for (const [slug, key] of Object.entries(ROUTES)) {
     for (const suffix of ['/', '/index.html', '/thankyou.html']) assert.equal(storeForPath('/' + slug + suffix).key, key);
   }
@@ -209,3 +209,32 @@ test('a 4–5 star link for another store or with extra parts is refused', async
   assert.equal(await controller.submit(answers(5)), false);
   assert.notEqual(states.at(-1).phase, 'submitted');
 });
+
+test('Selzari (was Nonali): its own route, and the old /nonali/ and /nosu/ invitation links, open the same store', () => {
+  for (const slug of ['selzari', 'nonali', 'nosu']) assert.equal(storeForPath('/' + slug + '/').key, 'nosura');
+  assert.equal(STORES.nosura.name, 'Selzari');
+  assert.equal(STORES.nosura.support_email, 'support@selzari.com');
+});
+
+test('Selzari accepts its own home host with or without www and the old nonali.com one, nothing else', async () => {
+  for (const home of ['https://selzari.com', 'https://www.selzari.com/', 'https://nonali.com', 'https://www.nonali.com/']) {
+    const { controller } = setup(async () => context({ store: { ...store, home_url: home, review_url: reviewUrl } }));
+    assert.equal(await controller.load(), true, home);
+    assert.equal(controller.phase, 'open', home);
+  }
+  for (const home of ['https://muupa.com', 'https://selzari.com.evil.example', 'http://selzari.com']) {
+    const { controller } = setup(async () => context({ store: { ...store, home_url: home, review_url: reviewUrl } }));
+    await controller.load();
+    assert.notEqual(controller.phase, 'open', home);
+  }
+});
+
+test('Selzari review links may name its Trustpilot page on selzari.com or the older nonali.com one', async () => {
+  for (const target of ['https://www.trustpilot.com/evaluate/selzari.com', 'https://www.trustpilot.com/evaluate/nonali.com']) {
+    const { controller, states } = setup(async path => path === API_PATHS.context ? context({ store: { ...store, review_url: target } }) : receipt({ review_url: target }));
+    await controller.load();
+    assert.equal(await controller.submit(answers(5)), true, target);
+    assert.equal(states.at(-1).review_url, target);
+  }
+});
+
