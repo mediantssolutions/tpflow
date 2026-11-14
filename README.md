@@ -1,7 +1,7 @@
 # Shopper Survey
 
 Static GitHub Pages frontend for the original five-question private feedback form.
-The eight current store routes and four legacy aliases share the original layout,
+The eight current store routes and five legacy aliases share the original layout,
 question labels and choices. No framework or installed dependency is required.
 
 ```sh
@@ -47,7 +47,7 @@ Reloading an already submitted invitation does not submit again.
 
 | Current route | Store key | Legacy alias |
 | --- | --- | --- |
-| `/nonali/` | `nosura` | `/nosu/` |
+| `/selzari/` | `nosura` | `/nonali/`, `/nosu/` |
 | `/loomlu/` | `celzoir` | |
 | `/muupa/` | `vicancio` | `/vic/` |
 | `/decorivialiving/` | `decorivialiving` | |
@@ -58,6 +58,11 @@ Reloading an already submitted invitation does not submit again.
 
 Each folder includes both `index.html` and `thankyou.html`. Directly opening a
 thank-you URL does not create or imply a successful response.
+
+Owner 2026-11-14: Nonali is now Selzari (same Shopify shop). Old invitation links on `/nonali/`
+and `/nosu/` keep working, a context may still name the old `nonali.com` home host while the
+server's pin moves (`retired_hosts`), and its review link may name Trustpilot's page on
+`selzari.com` or the older `nonali.com` one (`other_review_domains`) until that page moves.
 
 ## Validation
 

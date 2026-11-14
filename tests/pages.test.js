@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { ROUTES } from '../assets/stores.js';
 const labels = ["Q1. What's your name? (Same as used when placing the order)", 'Q2. How easy was it to place your order?', 'Q3. What made you decide to buy from us?', 'Q4. Is there anything we could improve?', 'Q5. How many stars would you give this experience?'];
 
-test('all twelve routes contain exact original five questions, disabled preview, no-referrer and ACK-only success', async () => {
+test('all thirteen routes contain exact original five questions, disabled preview, no-referrer and ACK-only success', async () => {
   for (const slug of Object.keys(ROUTES)) {
     const html = await readFile(new URL('../' + slug + '/index.html', import.meta.url), 'utf8');
     assert.equal((html.match(/class="question-label"/g) || []).length, 5);

@@ -18,4 +18,4 @@ const links = Object.values(STORES).map(store => '      <li><a href="' + store.s
 await writeFile(resolve(root, 'index.html'), `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><title>Shoppers Survey Hub</title><link rel="stylesheet" href="assets/survey.css"></head>
 <body><main class="survey-container"><h2>Shoppers Survey Hub</h2><p>Please open the survey link in your invitation email. Store previews below cannot be submitted without a valid invitation.</p><ul>\n${links}\n    </ul></main></body></html>\n`);
-console.log('Built eight current brand routes and four invitation-compatible aliases.');
+console.log('Built eight current brand routes and five invitation-compatible aliases.');
